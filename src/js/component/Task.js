@@ -1,19 +1,34 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 
 export const Task = (props) => {
-	function deleteTask(e) {
-		props.setterList((prevList) =>
-			prevList.filter((task, index) => {
-				if (index !== props.id) return true;
-			})
-		);
-	}
+	const deleteTask = useCallback(
+		async (e) => {
+			const response = await fetch(
+				"https://assets.breatheco.de/apis/fake/todos/user/caracas32",
+				{
+					method: "put",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(
+						props.list.filter((task, index) => {
+							return index !== props.id;
+						})
+					),
+				}
+			);
+			if (response.status !== 200) {
+				alert("problemas");
+				return;
+			}
+			await props.getToDos();
+		},
+		[props.getToDos, props.list, props.id]
+	);
 	return (
 		<li
 			className="d-flex justify-content-between doIt box"
 			style={{ padding: "5px", border: "1px solid #d9d9d9" }}>
-			<strong>{props.task}</strong>
+			<strong>{props.task.label}</strong>
 			<span
 				className="delete"
 				style={{
@@ -29,7 +44,7 @@ export const Task = (props) => {
 };
 
 Task.propTypes = {
-	task: PropTypes.string,
+	task: PropTypes.object,
 	setterList: PropTypes.func,
 	list: PropTypes.array,
 	id: PropTypes.number,
